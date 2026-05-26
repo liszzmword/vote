@@ -25,5 +25,8 @@ crawl.log
 # Probe scratch
 /tmp/nec_probe/
 
-# Local pledge text cache (optional, can be regenerated; keep out unless deliberately included)
-pledges_text.json
+# Pledge text cache (build artifact; regenerate from PDFs)
+# Note: virtual_poll.json depends on this. Keep locally; don't push the full version unless small.
+
+# NVIDIA Nemotron persona data — 10GB, too big for git
+Nemotron-Personas-Korea/
