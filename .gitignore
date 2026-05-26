@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS / Editor
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# Build / log artifacts
+pledges_crawl.log
+crawl.log
+*.log
+
+# Vercel
+.vercel
+
+# Claude Code local settings
+.claude/
+
+# Probe scratch
+/tmp/nec_probe/
+
+# Local pledge text cache (optional, can be regenerated; keep out unless deliberately included)
+pledges_text.json

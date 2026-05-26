@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>최용철 (더불어민주당) · 구시군의회의원선거 · 전주시가선거구 | 2026 지방선거</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <a href="../dashboard.html">← 대시보드로</a>
+    <span class="sep">·</span>
+    <span>구시군의회의원선거 전주시가선거구</span>
+  </div>
+
+  <div class="hero-card">
+    <img class="hero-photo" src="../photos/100162142.jpg" alt="최용철" onerror="this.classList.add('missing');this.removeAttribute('src');this.textContent=' ';">
+    <div class="hero-meta">
+      <div class="hero-name">최용철<span class="hanja">崔用喆</span></div>
+      <div class="hero-tags">
+        <span class="tag giho" style="border-color:#004EA255; color:#004EA2; background:#004EA211">기호 1-가</span>
+        <span class="tag" style="background:#004EA222; color:#004EA2">더불어민주당</span>
+        <span class="tag sg">구시군의회의원선거</span>
+        <span class="tag region">전주시가선거구</span>
+      </div>
+      <div class="hero-sub">huboId · 100162142</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>기본 정보 <span class="badge">중앙선관위 제출 자료 기준</span></h2>
+    <div class="row"><div class="k">성별</div><div class="v">남</div></div><div class="row"><div class="k">생년월일</div><div class="v">1975.07.16(50세)</div></div><div class="row"><div class="k">직업</div><div class="v">전주시의회의원</div></div><div class="row"><div class="k">주소</div><div class="v">전북특별자치도 전주시 덕진구 석소로</div></div>
+  </div>
+
+  <div class="section">
+    <h2>학력 · 경력</h2>
+    <div class="row"><div class="k">학력</div><div class="v">전북대학교 행정대학원 정치학석사(지방자치학)</div></div><div class="row"><div class="k">경력</div><div class="v">(전)전주시 자원봉사센터 운영위원(현) 제12대 전주시의회 행정위원장</div></div>
+  </div>
+
+  <div class="section">
+    <h2>재산 · 병역 · 납세 · 전과 <span class="badge">요약</span></h2>
+    <div class="row"><div class="k">재산신고액</div><div class="v">4억 820만원</div></div><div class="row"><div class="k">최근 5년 납부세액</div><div class="v">304만 9,000원</div></div><div class="row"><div class="k">최근 5년 체납액</div><div class="v">0원</div></div><div class="row"><div class="k">현재 체납액</div><div class="v">0원</div></div><div class="row"><div class="k">병역</div><div class="v">군복무를 마친사람</div></div><div class="row"><div class="k">전과</div><div class="v">1건</div></div><div class="row"><div class="k">입후보 횟수</div><div class="v">3회</div></div>
+    <a class="nec-link-btn" href="https://info.nec.go.kr/electioninfo/candidate_detail_info.xhtml?electionId=0020260603&amp;huboId=100162142" target="_blank" rel="noopener">
+      <span class="ico">→</span> 중앙선관위에서 상세 스캔 자료 보기
+    </a>
+  </div>
+
+  <div class="section">
+    <h2>공약 자료 <span class="badge">NEC 정책·공약마당</span></h2>
+    
+        <div class="pdf-tabs"><div class="pdf-tab active" data-pdf="https://cdn.nec.go.kr/policy_pdf/20260603/PDF/PBINFO/5301/003_100162142_20260525_1.pdf">선거공보</div></div>
+        <div class="pdf-wrap">
+          <iframe id="pdfFrame" title="후보자 공약 PDF"></iframe>
+          <div id="pdfLoading" class="pdf-loading">PDF 불러오는 중…</div>
+        </div>
+        <div class="pdf-download-row"><a class="pdf-download" href="https://cdn.nec.go.kr/policy_pdf/20260603/PDF/PBINFO/5301/003_100162142_20260525_1.pdf" download="최용철_선거공보.pdf" target="_blank" rel="noopener"><span class="ico">↓</span><span>선거공보 PDF 다운로드</span></a></div>
+        
+  </div>
+
+  <div class="section">
+    <h2>AI 공약 Q&amp;A <span class="badge">Gemini</span></h2>
+    <div class="qa-box">
+      <div class="qa-intro">
+        후보자가 NEC에 제출한 공약 자료를 바탕으로 답변합니다. 사실관계는 원문(위 PDF)을 직접 확인해 주세요.
+      </div>
+      <div class="qa-suggestions"><button type="button" class="qa-chip">이 후보의 핵심 5대 공약은?</button><button type="button" class="qa-chip">청년·일자리 관련 공약을 정리해줘</button><button type="button" class="qa-chip">주거·부동산 정책은?</button><button type="button" class="qa-chip">재원 조달 방안이 명시돼 있어?</button></div>
+      <div class="qa-msgs" id="qaMsgs"></div>
+      <form id="qaForm" class="qa-input-row">
+        <input id="qaInput" type="text" placeholder="이 후보 공약 중 궁금한 점을 물어보세요…" autocomplete="off">
+        <button id="qaSend" class="qa-send" type="submit">질문</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+window.CANDIDATE = {"huboId": "100162142", "name": "최용철", "party": "더불어민주당", "giho": "1-가", "subSgName": "구시군의회의원선거", "sgg": "전주시가선거구", "sido": "전북특별자치도"};
+window.PLEDGE_PDFS = [{"type": "선거공보", "url": "https://cdn.nec.go.kr/policy_pdf/20260603/PDF/PBINFO/5301/003_100162142_20260525_1.pdf"}];
+window.PLEDGE_TEXT = "";
+</script>
+<script src="qa.js"></script>
+</body>
+</html>
