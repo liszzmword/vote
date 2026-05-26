@@ -17,24 +17,35 @@ const MODEL = 'gemini-2.5-flash-lite';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 const PDF_SIZE_LIMIT = 18 * 1024 * 1024; // 18MB — inline_data 한도 고려
 
-function buildSystemPrompt(c = {}) {
-  const candidateLine = c && c.name
-    ? `대상 후보자: ${c.name} (${c.party || ''}, 기호 ${c.giho || '?'}번, ${c.subSgName || ''} ${c.sgg || ''})`
-    : '';
+function buildSystemPrompt(c = {}, mode = 'single') {
+  let focusLine = '';
+  let modeRule = '';
+  if (mode === 'compare') {
+    focusLine = '작업 모드: 여러 후보의 공약을 비교 분석.';
+    modeRule = `
+[비교 모드 추가 규칙]
+- 첨부된 PDF 각각이 어느 후보의 것인지 (위 PDF: 후보명(정당)) 표시가 옆에 붙어 있으니 그걸 기준으로 후보별 입장을 정리하세요.
+- 분야(예: 주거, 교통, 일자리, 복지, 교육, 환경 등)별로 후보별 입장을 짧게 비교하세요.
+- 한 분야에서 한 후보만 언급했고 다른 후보는 안 다뤘다면 "(다른 후보는 해당 분야 미언급)" 처럼 명시.
+- "더 낫다/잘했다/올바르다" 같은 평가는 절대 금지. 사실만 제시.`;
+  } else if (c && c.name) {
+    focusLine = `대상 후보자: ${c.name} (${c.party || ''}, 기호 ${c.giho || '?'}번, ${c.subSgName || ''} ${c.sgg || ''})`;
+  }
 
   return `당신은 2026년 6월 3일 제9회 전국동시지방선거 관련 질문에만 답변하는 AI 어시스턴트입니다.
-${candidateLine}
+${focusLine}
 
 [답변 가능 범위]
 - 후보자의 공약, 정책, 비전
 - 후보자의 기본 정보(정당, 선거구, 기호 등 공개된 정보)
 - 2026 지방선거 제도, 일정, 절차에 관한 일반 정보
+- 여러 후보 공약의 분야별 비교 (사실 기반, 평가 금지)
 
 [답변 금지 범위]
 - 선거와 무관한 일반 질문 (날씨, 음식, 코딩, 일상 잡담 등)
 - 다른 선거(대선/총선 등) 또는 과거 선거 관련 질문
 - 특정 후보를 비방하거나 정치적으로 평가하는 질문
-- 다른 후보와의 비교·우열 평가
+- "어느 후보가 더 낫다/적합하다" 같은 우열 평가
 - 자료에 근거하지 않은 추측
 
 [선거 무관 질문에 대한 응답 규칙]
@@ -42,10 +53,10 @@ ${candidateLine}
 "저는 2026 지방선거 후보자와 공약에 관한 질문만 답변할 수 있어요. 선거 관련해서 다른 궁금한 점 있으세요?"
 
 [답변 형식]
-- 한국어, 간결하게(3~6문장).
+- 한국어, 간결하게(단일 후보 3~6문장 / 비교는 분야별로 1~2문장씩, 전체 12문장 이내).
 - 마크다운 사용 금지: **굵게**, *기울임*, # 헤더, > 인용, --- 구분선, [링크](url) 등 일체 금지.
 - 항목 나열이 꼭 필요하면 "1) ... 2) ... 3) ..." 또는 빈 줄로 구분된 짧은 문장.
-- 자료에 없는 내용은 추측하지 말고 "제출된 공약 자료에서 확인되지 않습니다"라고 답변.`;
+- 자료에 없는 내용은 추측하지 말고 "제출된 공약 자료에서 확인되지 않습니다"라고 답변.${modeRule}`;
 }
 
 function cleanAnswer(text) {
@@ -89,7 +100,7 @@ export default async function handler(req, res) {
   if (typeof body === 'string') {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
-  const { question = '', candidate = {}, pledgeText = '', pdfUrls = [] } = body || {};
+  const { question = '', candidate = {}, pledgeText = '', pdfUrls = [], mode = 'single' } = body || {};
   if (!question || typeof question !== 'string') {
     return res.status(400).json({ error: 'question 필드가 필요합니다.' });
   }
@@ -123,9 +134,12 @@ export default async function handler(req, res) {
   parts.push({ text: '질문: ' + question });
 
   const reqBody = {
-    system_instruction: { parts: [{ text: buildSystemPrompt(candidate) }] },
+    system_instruction: { parts: [{ text: buildSystemPrompt(candidate, mode) }] },
     contents: [{ role: 'user', parts }],
-    generationConfig: { temperature: 0.2, maxOutputTokens: 1024 },
+    generationConfig: {
+      temperature: 0.2,
+      maxOutputTokens: mode === 'compare' ? 2048 : 1024,
+    },
   };
 
   try {
