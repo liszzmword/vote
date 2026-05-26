@@ -748,6 +748,22 @@ TEMPLATE = r"""<!DOCTYPE html>
   .qa-msg.bot { background: var(--surface); color: var(--charcoal); align-self: flex-start; max-width: 90%; border: 1px solid var(--hairline); }
   .qa-msg.bot.error { background: #fff1f0; border-color: #fecaca; color: #991b1b; }
   .qa-msg.bot.loading { color: var(--steel); font-style: italic; }
+  .qa-actions {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+  }
+  .qa-action-btn {
+    padding: 6px 12px; background: var(--canvas); border: 1px solid var(--hairline);
+    border-radius: var(--r-md); font-family: inherit; font-size: 12px; font-weight: 500;
+    color: var(--charcoal); cursor: pointer; transition: border-color 0.12s, color 0.12s;
+  }
+  .qa-action-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .qa-action-btn.primary {
+    background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+  }
+  .qa-action-btn.primary:hover:not(:disabled) {
+    background: var(--primary-pressed); border-color: var(--primary-pressed); color: var(--on-primary);
+  }
+  .qa-action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .qa-input-row { display: flex; gap: 8px; }
   .qa-input-row input {
     flex: 1; padding: 11px 14px; border: 1px solid var(--hairline);
@@ -1803,6 +1819,33 @@ render();
     return div;
   }
 
+  // 본문 텍스트 + 액션 버튼이 함께 달린 봇 메시지
+  function addActionMsg(text, actions){
+    const div = document.createElement('div');
+    div.className = 'qa-msg bot';
+    div.textContent = text;
+    if (actions && actions.length) {
+      const row = document.createElement('div');
+      row.className = 'qa-actions';
+      for (const a of actions) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'qa-action-btn' + (a.primary ? ' primary' : '');
+        b.textContent = a.label;
+        b.addEventListener('click', () => {
+          row.querySelectorAll('button').forEach(x => x.disabled = true);
+          try { a.onClick && a.onClick(); } catch(e) { console.error(e); }
+        });
+        row.appendChild(b);
+      }
+      div.appendChild(row);
+    }
+    msgs.appendChild(div);
+    const body = document.querySelector('#chatPanel .chat-body');
+    if (body) body.scrollTop = body.scrollHeight;
+    return div;
+  }
+
   // ---------- 의도/지역/선거종류 분류 ----------
   function detectIntent(q){
     if (/비교|차이|뭐가 달라|구분|어느.*낫|어느.*좋|누가.*더|대조/.test(q)) return 'compare';
@@ -1810,26 +1853,37 @@ render();
     return 'qa';
   }
 
-  // 선거종류 키워드 → 매칭 함수
-  const ELEC_TYPE_MAP = [
-    { kw: ['교육감'], match: e => e === '교육감선거' },
-    { kw: ['시도지사','광역단체장','도지사','특별시장','광역시장'], match: e => e === '시도지사선거' },
-    { kw: ['구청장','군수','기초단체장','자치단체장'], match: e => e === '구시군의장선거' },
-    { kw: ['시도의원','도의원','광역의원'], match: e => e === '시도의회의원선거' },
-    { kw: ['구의원','시군의원','기초의원'], match: e => e === '구시군의회의원선거' },
-    { kw: ['광역.*비례','시도.*비례'], match: e => e === '광역의원비례대표선거', regex: true },
-    { kw: ['기초.*비례'], match: e => e === '기초의원비례대표선거', regex: true },
-    { kw: ['국회의원','보궐'], match: e => (e || '').startsWith('국회의원선거') },
-    // "시장" 은 모호 — 시도지사 + 구시군장 둘 다 허용
-    { kw: ['시장'], match: e => e === '시도지사선거' || e === '구시군의장선거' },
-  ];
+  // 광역시(특별시 포함)·도 짧은 이름 — "서울시장" → 시도지사 식별용
+  const METRO_SHORT = ['서울','부산','대구','인천','광주','대전','울산','세종','제주','전남광주통합'];
+  const PROVINCE_SHORT = ['경기','강원','충북','충남','전북','전남','경북','경남','제주'];
+
   function classifyElectionType(q){
-    for (const rule of ELEC_TYPE_MAP) {
-      for (const kw of rule.kw) {
-        const hit = rule.regex ? new RegExp(kw).test(q) : q.includes(kw);
-        if (hit) return rule.match;
+    if (/교육감/.test(q)) return e => e === '교육감선거';
+    if (/도지사|광역단체장|특별시장|광역시장|시도지사/.test(q)) return e => e === '시도지사선거';
+
+    // "서울시장", "부산 시장" 등 광역단위 시장 → 시도지사
+    for (const m of METRO_SHORT) {
+      if (q.includes(m + '시장') || q.includes(m + ' 시장') ||
+          q.includes(m + '특별시장') || q.includes(m + '광역시장')) {
+        return e => e === '시도지사선거';
       }
     }
+    // "경기지사", "충남도지사" 등 — 위에서 이미 잡았지만 명시
+    for (const p of PROVINCE_SHORT) {
+      if (q.includes(p + '지사') || q.includes(p + ' 지사') || q.includes(p + '도지사')) {
+        return e => e === '시도지사선거';
+      }
+    }
+
+    if (/구청장|군수|기초단체장|자치단체장/.test(q)) return e => e === '구시군의장선거';
+    if (/시도의원|도의원|광역의원/.test(q)) return e => e === '시도의회의원선거';
+    if (/구의원|시군의원|기초의원/.test(q)) return e => e === '구시군의회의원선거';
+    if (/광역.*비례|시도.*비례/.test(q)) return e => e === '광역의원비례대표선거';
+    if (/기초.*비례/.test(q)) return e => e === '기초의원비례대표선거';
+    if (/국회의원|보궐/.test(q)) return e => (e || '').startsWith('국회의원선거');
+
+    // 그냥 "시장" — 일반 시 단위 단체장 (수원시장, 성남시장 등)
+    if (/시장/.test(q)) return e => e === '구시군의장선거';
     return null;
   }
 
@@ -1926,21 +1980,8 @@ render();
     }
   }
 
-  async function askCompare(question, cands){
-    const withPledges = cands.filter(c => c.pl && c.pl.length);
-    if (withPledges.length < 2) {
-      addMsg('bot',
-        `비교 가능한 후보가 ${withPledges.length}명뿐이에요 (공약 자료 제출 기준). 더 큰 범위로 다시 물어봐 주세요.`,
-        'error');
-      return;
-    }
-    if (withPledges.length > 4) {
-      addMsg('bot',
-        `비교 대상이 너무 많아요 (${withPledges.length}명). 4명 이하로 좁혀 주세요. 정당이나 더 좁은 선거구를 추가해 보세요.\n예: "수원시 영통구갑 후보 비교"`,
-        'error');
-      return;
-    }
-    // 후보별 선거공보 한 부만 묶어서 전송
+  // 실제 비교 실행 (확정된 후보 리스트로)
+  async function doCompare(question, withPledges){
     const pdfBundle = [];
     for (const c of withPledges) {
       const main = c.pl.find(p => p.type === '선거공보') || c.pl[0];
@@ -1977,6 +2018,55 @@ render();
     }
   }
 
+  // 비교 의도가 있지만 후보가 많아 확인이 필요한 경우
+  function confirmAndCompare(question, cands){
+    const withPledges = cands.filter(c => c.pl && c.pl.length);
+    if (withPledges.length < 2) {
+      addMsg('bot',
+        `비교 가능한 후보가 ${withPledges.length}명뿐이에요 (공약 자료 제출 기준). 범위를 더 넓혀 다시 물어봐 주세요.`,
+        'error');
+      return;
+    }
+    // 2~4명: 바로 비교
+    if (withPledges.length <= 4) {
+      return doCompare(question, withPledges);
+    }
+    // 5명 이상: 되묻기. 상위 4~6명까지 시도
+    const target = withPledges.slice(0, 6);
+    const lines = target.map(fmtCandLine).join('\n');
+    const tail = withPledges.length > target.length
+      ? `\n\n(공약 제출 후보 ${withPledges.length}명 중 기호 순 ${target.length}명을 추렸어요)`
+      : '';
+    addActionMsg(
+      `이 후보들을 말씀하시는 건가요? 비교 진행할까요?\n${lines}${tail}`,
+      [
+        { label: '이대로 비교 진행', primary: true, onClick: () => doCompare(question, target) },
+        { label: '취소', onClick: () => addMsg('bot', '취소했어요. 정당이나 더 좁은 선거구를 추가해 다시 물어봐 주세요.') },
+      ]
+    );
+  }
+
+  // 모호한 매칭일 때 후보별 선택지를 보여주고 되묻는 UI
+  function showCandidatePicker(question, cands, headline){
+    const top = cands.slice(0, 6);
+    const lines = cands.slice(0, 15).map(fmtCandLine).join('\n');
+    const more = cands.length > 15 ? `\n... 외 ${cands.length - 15}명 (좁혀주세요)` : '';
+    const buttons = top.map((c, i) => ({
+      label: `[${i+1}] ${c.n} (${c.p})`,
+      onClick: () => askSingle(question, c)
+    }));
+    const withPledgeCount = cands.filter(c => c.pl && c.pl.length).length;
+    if (withPledgeCount >= 2 && cands.length <= 8) {
+      buttons.unshift({
+        label: '전체 비교',
+        primary: true,
+        onClick: () => doCompare(question, cands.filter(c => c.pl && c.pl.length).slice(0, 6))
+      });
+    }
+    buttons.push({ label: '취소', onClick: () => addMsg('bot', '취소했어요.') });
+    addActionMsg(`${headline}\n${lines}${more}`, buttons);
+  }
+
   async function ask(question){
     if (!question.trim()) return;
     addMsg('user', question);
@@ -1985,16 +2075,15 @@ render();
     try {
       const intent = detectIntent(question);
 
-      // 1) 후보 이름 매칭 우선 (compare 가 아닐 때만)
+      // 1) 후보 이름 매칭 (compare 의도가 아닐 때 우선)
       const nameMatches = findCandidatesByName(question);
       if (nameMatches.length > 0 && intent !== 'compare') {
         const top = nameMatches[0].n;
         const ambiguous = nameMatches.filter(m => m.n === top);
         if (ambiguous.length > 1) {
-          const lines = ambiguous.slice(0, 5).map(fmtCandLine).join('\n');
-          addMsg('bot',
-            `같은 이름의 후보가 ${ambiguous.length}명 있어요. 선거구나 정당을 함께 적어 주세요:\n${lines}`,
-            'error');
+          // 동명이인 — 되묻기
+          showCandidatePicker(question, ambiguous,
+            `같은 이름의 후보가 ${ambiguous.length}명 있어요. 누구를 말씀하시는 건가요?`);
           return;
         }
         return await askSingle(question, nameMatches[0]);
@@ -2022,19 +2111,20 @@ render();
         return;
       }
 
-      // 3) 의도에 따라 분기
+      // 3) 의도별 분기
       if (intent === 'compare') {
-        return await askCompare(question, filtered);
+        return confirmAndCompare(question, filtered);
       }
       if (intent === 'list') {
         renderCandidateList(filtered, `조건에 맞는 후보 ${filtered.length}명:`);
         return;
       }
-      // 기본: 후보 1명이면 단일 응답, 여러 명이면 목록 안내
+      // 기본 의도 (qa) — 후보 1명이면 답변, 여러 명이면 되묻기
       if (filtered.length === 1) {
         return await askSingle(question, filtered[0]);
       }
-      renderCandidateList(filtered, `조건에 맞는 후보 ${filtered.length}명을 찾았어요. 특정 후보를 고르거나 "비교해줘"를 덧붙여 주세요:`);
+      showCandidatePicker(question, filtered,
+        `조건에 맞는 후보가 ${filtered.length}명 있어요. 누구의 공약이 궁금하신가요?`);
 
     } catch(e) {
       addMsg('bot', '요청 실패: ' + (e.message || e), 'error');

@@ -15,7 +15,9 @@ export const config = { maxDuration: 60 };
 
 const MODEL = 'gemini-2.5-flash-lite';
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-const PDF_SIZE_LIMIT = 18 * 1024 * 1024; // 18MB — inline_data 한도 고려
+const PDF_SIZE_LIMIT = 18 * 1024 * 1024; // 단일 PDF — inline_data 한도 고려
+const TOTAL_PDF_BUDGET = 18 * 1024 * 1024; // 한 요청에 담을 PDF 총 크기 (Gemini ~20MB 한도)
+const MAX_PDFS = 6;
 
 function buildSystemPrompt(c = {}, mode = 'single') {
   let focusLine = '';
@@ -72,15 +74,12 @@ function cleanAnswer(text) {
   return t.trim();
 }
 
-async function fetchPdfPart(url, type) {
+async function fetchPdfBytes(url) {
   const r = await fetch(url, { redirect: 'follow' });
   if (!r.ok) return null;
   const buf = Buffer.from(await r.arrayBuffer());
   if (buf.length === 0 || buf.length > PDF_SIZE_LIMIT) return null;
-  return {
-    label: type,
-    part: { inline_data: { mime_type: 'application/pdf', data: buf.toString('base64') } },
-  };
+  return buf;
 }
 
 export default async function handler(req, res) {
@@ -113,13 +112,24 @@ export default async function handler(req, res) {
     parts.push({ text: '아래는 후보자가 NEC에 제출한 공약 자료에서 추출한 텍스트입니다.\n\n' + pledgeText });
     usedSource = 'text';
   } else if (Array.isArray(pdfUrls) && pdfUrls.length > 0) {
-    const results = await Promise.all(
-      pdfUrls.slice(0, 4).map((p) => fetchPdfPart(p.url, p.type).catch(() => null))
+    // 병렬로 PDF 다운로드, 순서대로 budget 누적
+    const fetched = await Promise.all(
+      pdfUrls.slice(0, MAX_PDFS).map(async (p) => {
+        try { return { ...p, buf: await fetchPdfBytes(p.url) }; }
+        catch { return { ...p, buf: null }; }
+      })
     );
-    for (const r of results) {
-      if (!r) continue;
-      parts.push(r.part);
-      parts.push({ text: `(위 PDF: ${r.label})` });
+    let remaining = TOTAL_PDF_BUDGET;
+    const skipped = [];
+    for (const item of fetched) {
+      if (!item.buf) { skipped.push(item.type); continue; }
+      if (item.buf.length > remaining) { skipped.push(item.type); continue; }
+      parts.push({ inline_data: { mime_type: 'application/pdf', data: item.buf.toString('base64') } });
+      parts.push({ text: `(위 PDF: ${item.type})` });
+      remaining -= item.buf.length;
+    }
+    if (skipped.length) {
+      parts.push({ text: `(주의: 다음 후보 자료는 용량 한도로 제외됨 — ${skipped.join(', ')})` });
     }
     if (parts.length > 0) usedSource = 'pdf';
   }
