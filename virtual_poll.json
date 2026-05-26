@@ -1,0 +1,189 @@
+[
+  {
+    "race_key": "시도지사선거|서울특별시",
+    "sheet": "시도지사선거",
+    "sido": "서울특별시",
+    "region": "서울특별시",
+    "level": "sido",
+    "n_voters": 20,
+    "n_sampled": 20,
+    "candidates": [
+      {
+        "huboId": "100157144",
+        "giho": "1",
+        "name": "정원오",
+        "party": "더불어민주당",
+        "letter": "A"
+      },
+      {
+        "huboId": "100162984",
+        "giho": "2",
+        "name": "오세훈",
+        "party": "국민의힘",
+        "letter": "B"
+      },
+      {
+        "huboId": "100158541",
+        "giho": "4",
+        "name": "김정철",
+        "party": "개혁신당",
+        "letter": "C"
+      },
+      {
+        "huboId": "100162632",
+        "giho": "5",
+        "name": "유지혜",
+        "party": "여성의당",
+        "letter": "D"
+      },
+      {
+        "huboId": "100162642",
+        "giho": "6",
+        "name": "이강산",
+        "party": "자유통일당",
+        "letter": "E"
+      },
+      {
+        "huboId": "100162720",
+        "giho": "7",
+        "name": "권영국",
+        "party": "정의당",
+        "letter": "F"
+      }
+    ],
+    "tally": {
+      "A": {
+        "strong": 2,
+        "moderate": 5,
+        "reluctant": 0,
+        "total": 7,
+        "pct": 35.0,
+        "avg_likeability": 5.95
+      },
+      "B": {
+        "strong": 4,
+        "moderate": 3,
+        "reluctant": 0,
+        "total": 7,
+        "pct": 35.0,
+        "avg_likeability": 5.95
+      },
+      "C": {
+        "strong": 0,
+        "moderate": 0,
+        "reluctant": 0,
+        "total": 0,
+        "pct": 0.0,
+        "avg_likeability": 2.75
+      },
+      "D": {
+        "strong": 0,
+        "moderate": 1,
+        "reluctant": 0,
+        "total": 1,
+        "pct": 5.0,
+        "avg_likeability": 3.25
+      },
+      "E": {
+        "strong": 0,
+        "moderate": 0,
+        "reluctant": 0,
+        "total": 0,
+        "pct": 0.0,
+        "avg_likeability": 1.3
+      },
+      "F": {
+        "strong": 1,
+        "moderate": 2,
+        "reluctant": 0,
+        "total": 3,
+        "pct": 15.0,
+        "avg_likeability": 5.0
+      },
+      "none": {
+        "total": 1,
+        "pct": 5.0
+      },
+      "abstain": {
+        "total": 1,
+        "pct": 5.0
+      }
+    },
+    "key_issues_top": [
+      [
+        "주거·일자리",
+        1
+      ],
+      [
+        "관심없음",
+        1
+      ],
+      [
+        "여성 안전",
+        1
+      ],
+      [
+        "일자리·청년",
+        1
+      ],
+      [
+        "교통·통근",
+        1
+      ],
+      [
+        "상가임대료",
+        1
+      ],
+      [
+        "돌봄·여성",
+        1
+      ],
+      [
+        "교육·주거",
+        1
+      ]
+    ],
+    "comments": [
+      {
+        "age": "26",
+        "sex": "남자",
+        "occupation": "광고 및 홍보 사무원",
+        "district": "서울-중랑구",
+        "vote": "F",
+        "text": "무상주택 약속이 제일 솔직히 와닿긴 하는데 정말 될지는 모르겠음."
+      },
+      {
+        "age": "30",
+        "sex": "남자",
+        "occupation": "자재 관리 사무원",
+        "district": "서울-영등포구",
+        "vote": "A",
+        "text": "통근에 매일 한 시간 넘게 쓰는데 30분 통근도시 얘기는 제일 솔깃해요."
+      },
+      {
+        "age": "43",
+        "sex": "여자",
+        "occupation": "지방행정 사무원",
+        "district": "서울-금천구",
+        "vote": "A",
+        "text": "맞벌이로 아이 키우는데 24시간 돌봄·통근 단축이 진짜 절실해요. 금천에서 출퇴근하면 답이 없거든요."
+      },
+      {
+        "age": "57",
+        "sex": "남자",
+        "occupation": "그 외 건축 도장공",
+        "district": "서울-관악구",
+        "vote": "A",
+        "text": "50대 후반에 일용 일거리 다니는데, 일자리 재설계랑 시니어 지원이 가장 와닿네요."
+      },
+      {
+        "age": "84",
+        "sex": "남자",
+        "occupation": "무직",
+        "district": "서울-노원구",
+        "vote": "B",
+        "text": "노원에서 평생 살았는데 강북 다시 살리겠다는 약속이 가장 와닿아요."
+      }
+    ]
+  }
+]

@@ -308,6 +308,19 @@ TEMPLATE = r"""<!DOCTYPE html>
     font-family: inherit; box-shadow: var(--shadow-mockup); outline: none;
   }
   .search-input:focus { border-color: var(--primary); border-width: 2px; padding: 0 56px 0 23px; }
+  /* Virtual poll CTA card under search */
+  .poll-cta {
+    max-width: 580px; margin: 18px auto 0; display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px; background: rgba(255,255,255,0.08); color: var(--on-dark);
+    border: 1px solid rgba(255,255,255,0.16); border-radius: var(--r-md); text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .poll-cta:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.32); text-decoration: none; }
+  .poll-cta-icon { font-size: 24px; line-height: 1; }
+  .poll-cta-body { flex: 1; text-align: left; }
+  .poll-cta-title { font-size: 15px; font-weight: 600; color: var(--on-dark); }
+  .poll-cta-sub { font-size: 12px; color: var(--on-dark-muted); margin-top: 2px; }
+  .poll-cta-arrow { color: var(--on-dark); font-size: 18px; font-weight: 600; }
   .search-icon {
     position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
     width: 20px; height: 20px; color: var(--steel); pointer-events: none;
@@ -868,6 +881,14 @@ TEMPLATE = r"""<!DOCTYPE html>
       <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
     </div>
     <div class="search-hint">선택한 후보자의 사진 · 학력 · 경력 · 재산 · 전과 정보를 확인할 수 있습니다</div>
+    <a class="poll-cta" href="virtual_poll.html">
+      <div class="poll-cta-icon">🗳️</div>
+      <div class="poll-cta-body">
+        <div class="poll-cta-title">가상 여론조사 보러가기</div>
+        <div class="poll-cta-sub">NVIDIA Nemotron 페르소나가 공약만 보고 가상 투표한 결과</div>
+      </div>
+      <div class="poll-cta-arrow">→</div>
+    </a>
   </div>
 </header>
 
